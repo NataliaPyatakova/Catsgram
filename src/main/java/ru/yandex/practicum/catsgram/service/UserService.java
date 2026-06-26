@@ -1,7 +1,6 @@
 package ru.yandex.practicum.catsgram.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.catsgram.exception.ConditionsNotMetException;
 import ru.yandex.practicum.catsgram.exception.DuplicatedDataException;
 import ru.yandex.practicum.catsgram.exception.NotFoundException;
@@ -19,7 +18,7 @@ public class UserService {
         return users.values();
     }
 
-    public User create(@RequestBody User user) {
+    public User create(User user) {
         // проверяем выполнение необходимых условий
         if (user.getEmail() == null || user.getEmail().isBlank()) {
             throw new ConditionsNotMetException("Имейл должен быть указан");
@@ -36,7 +35,7 @@ public class UserService {
         return user;
     }
 
-    public User update(@RequestBody User newUser) {
+    public User update(User newUser) {
         // проверяем необходимые условия
         if (newUser.getId() == null) {
             throw new ConditionsNotMetException("Id должен быть указан");
@@ -62,6 +61,10 @@ public class UserService {
             return oldUser;
         }
         throw new NotFoundException("Пользователь с id = " + newUser.getId() + " не найден");
+    }
+
+    public Optional<User> findById(Long id) {
+        return users.values().stream().filter(u -> u.getId().equals(id)).findFirst();
     }
 
     // вспомогательный метод для генерации идентификатора нового юзверя
