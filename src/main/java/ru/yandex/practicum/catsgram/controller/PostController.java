@@ -2,10 +2,13 @@ package ru.yandex.practicum.catsgram.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.catsgram.enumeration.SortOrder;
 import ru.yandex.practicum.catsgram.model.Post;
 import ru.yandex.practicum.catsgram.service.PostService;
+import jakarta.validation.constraints.Positive;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/posts")
@@ -19,8 +22,15 @@ public class PostController {
     }
 
     @GetMapping
-    public Collection<Post> findAll() {
-        return postService.findAll();
+    public Collection<Post> findAll(@RequestParam(value = "from" , defaultValue = "1") int from,
+                                    @RequestParam(value = "size" , defaultValue = "10") @Positive int size,
+                                    @RequestParam(value = "sort" , defaultValue = "desc") String sort) {
+        return postService.findAll(from, size, SortOrder.from(sort));
+    }
+
+    @GetMapping("/{id}")
+    public Optional<Post> findById(@PathVariable("id") long id) {
+        return postService.findById(id);
     }
 
     @PostMapping

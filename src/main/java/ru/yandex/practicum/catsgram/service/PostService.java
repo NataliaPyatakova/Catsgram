@@ -2,16 +2,14 @@ package ru.yandex.practicum.catsgram.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.catsgram.enumeration.SortOrder;
 import ru.yandex.practicum.catsgram.exception.ConditionsNotMetException;
 import ru.yandex.practicum.catsgram.exception.NotFoundException;
 import ru.yandex.practicum.catsgram.model.Post;
 import ru.yandex.practicum.catsgram.model.User;
 
 import java.time.Instant;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 // Указываем, что класс PostService - является бином и его
 // нужно добавить в контекст приложения
@@ -26,8 +24,20 @@ public class PostService {
         this.userService = userService;
     }
 
-    public Collection<Post> findAll() {
-        return posts.values();
+    public Collection<Post> findAll(int from, int size, SortOrder sort) {
+        if (sort.equals(SortOrder.DESCENDING)) {
+            return posts.values().stream()
+                    .sorted(Comparator.comparing(Post::getPostDate).reversed())
+                    .skip(from)
+                    .limit(size)
+                    .toList();
+        } else {
+            return posts.values().stream()
+                    .sorted(Comparator.comparing(Post::getPostDate))
+                    .skip(from)
+                    .limit(size)
+                    .toList();
+        }
     }
 
     public Post create(Post post) {
@@ -57,6 +67,10 @@ public class PostService {
             return oldPost;
         }
         throw new NotFoundException("Пост с id = " + newPost.getId() + " не найден");
+    }
+
+    public Optional<Post> findById(Long id) {
+        return posts.values().stream().filter(u -> u.getId().equals(id)).findFirst();
     }
 
     private long getNextId() {
