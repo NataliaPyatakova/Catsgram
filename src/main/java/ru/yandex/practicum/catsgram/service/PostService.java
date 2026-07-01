@@ -25,19 +25,11 @@ public class PostService {
     }
 
     public Collection<Post> findAll(int from, int size, SortOrder sort) {
-        if (sort.equals(SortOrder.DESCENDING)) {
-            return posts.values().stream()
-                    .sorted(Comparator.comparing(Post::getPostDate).reversed())
-                    .skip(from)
-                    .limit(size)
-                    .toList();
-        } else {
-            return posts.values().stream()
-                    .sorted(Comparator.comparing(Post::getPostDate))
-                    .skip(from)
-                    .limit(size)
-                    .toList();
-        }
+        return posts.values().stream()
+                .sorted(sort.equals(SortOrder.DESCENDING) ? Comparator.comparing(Post::getPostDate).reversed() : Comparator.comparing(Post::getPostDate))
+                .skip(from)
+                .limit(size)
+                .toList();
     }
 
     public Post create(Post post) {
