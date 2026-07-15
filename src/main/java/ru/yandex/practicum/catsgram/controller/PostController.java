@@ -4,9 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.catsgram.enumeration.SortOrder;
+import ru.yandex.practicum.catsgram.exception.ParameterNotValidException;
 import ru.yandex.practicum.catsgram.model.Post;
 import ru.yandex.practicum.catsgram.service.PostService;
-import jakarta.validation.constraints.Positive;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -23,10 +23,21 @@ public class PostController {
     }
 
     @GetMapping
-    public Collection<Post> findAll(@RequestParam(value = "from" , defaultValue = "1") int from,
-                                    @RequestParam(value = "size" , defaultValue = "10") @Positive int size,
-                                    @RequestParam(value = "sort" , defaultValue = "desc") String sort) {
-        return postService.findAll(from, size, SortOrder.from(sort));
+    public Collection<Post> findAll(@RequestParam(value = "from", defaultValue = "1") int from,
+                                    @RequestParam(value = "size", defaultValue = "10") int size,
+                                    @RequestParam(value = "sort", defaultValue = "desc") String sort) {
+        SortOrder sortOrder = SortOrder.from(sort);
+        if (sortOrder == null) {
+            throw new ParameterNotValidException("sort", "Некорректный параметр сортировки. Значение может быть asc или desc.");
+        }
+        if (size <= 0) {
+            throw new ParameterNotValidException("size", "Некорректный размер выборки. Размер должен быть больше нуля");
+        }
+        if (from < 0) {
+            throw new ParameterNotValidException("from", "Некорректная начальная позиция выборки");
+        }
+
+        return postService.findAll(from, size, sortOrder);
     }
 
     @GetMapping("/{id}")
